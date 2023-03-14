@@ -18,15 +18,11 @@ class Obstacle(pygame.sprite.Sprite):
         self.rect.topleft = self.start_pos
         self.hit = True
 
-    def move(self):
+    def update(self):
         dx = 0
         dx += self.speed
         self.rect.x += dx
     
     def reset(self):
         self.rect.topleft = self.start_pos
-
-    def draw(self, screen: pygame.Surface, box: bool=False):
-        screen.blit(self.image, self.rect)
-        if box:
-            pygame.draw.rect(screen, "white", self.rect, 1)
+        self.hit = True

@@ -15,51 +15,46 @@ class PlayerSprites:
             self.metadata = json.load(f)
         self.actions = self.metadata.keys()
 
+    def num_frames(self, action: str):
+        return self.metadata[action]["frames"]
+
     def get_sprite(self, x: int, y: int, w: int, h: int):
         sprite = pygame.Surface((w, h))
         sprite.set_colorkey((0,0,0))
         sprite.blit(self.sprite_sheet, (0, 0), (x, y, w, h))
         sprite = pygame.transform.scale2x(sprite)
         return sprite
-    
-    def parse_sprites(self, action: str):
-        sprites = self.metadata[action]["sprites"]
-        return sprites
 
     def parse_sprite(self, action: str, frame: int):
-        sprites = self.parse_sprites(action)
+        sprites = self.metadata[action]["sprites"]
         x, y, w, h = sprites[frame].values()
         image = self.get_sprite(x, y, w, h)
         return image
-    
-    def num_frames(self, action: str):
-        return self.metadata[action]["frames"]
+
 
 class Player(pygame.sprite.Sprite):
-    def __init__(self, spritesheet: PlayerSprites):
+    def __init__(self, spritesheet: PlayerSprites, health: int=5):
         super().__init__()
         self._speed = 6
-        self.y_vel = 0
+        self.velocity = vec(0, 0)
         self.jump = False
         self.in_air = False
-        self.start_pos = vec((75, 497))
+        self.move_left = False
+        self.move_right = False
         self.action = "idle"
-        self.hp = 3
-
-        # not good, reevaluate
-        self.sprites = spritesheet
-        self.animation_list = []
-        self.animation_index = 0
-        self.update_time = pygame.time.get_ticks()
-        for i in range(self.sprites.num_frames(self.action)):
-            img = self.sprites.parse_sprite(self.action, i)
-            self.animation_list.append(img)
-        self.image = self.animation_list[self.animation_index]
+        self.hp = health
+        self.immunity = 0
         self.direction = 1
         self.flip = False
 
+        # not good, reevaluate
+        self.sprites = spritesheet
+        self.animation_index = 0
+        self.update_time = pygame.time.get_ticks()
+
+        self.image, self.mask = self.update_animation()
         self.rect = self.image.get_rect()
-        self.mask = pygame.mask.from_surface(self.image)
+        self.start_pos = vec((75, Config.GROUND_HEIGHT-self.rect.height))
         self.rect.topleft = self.start_pos
 
     def update_action(self, new_action: str):
@@ -77,53 +72,68 @@ class Player(pygame.sprite.Sprite):
         if self.animation_index >= self.sprites.num_frames(self.action):
             self.animation_index = 0
         self.image = self.sprites.parse_sprite(self.action, self.animation_index)
+        self.mask = pygame.mask.from_surface(self.image)
+        return self.image, self.mask
 
-    def move(self, move_left: bool, move_right: bool):
-        # reset movement
-        dx = 0
-        dy = 0
-
-        if move_left:
+    def move(self):
+        if self.move_left:
             self.flip = True
             self.direction = -1
-            dx = self._speed * self.direction
-        if move_right:
+            self.velocity.x = self._speed * self.direction
+        elif self.move_right:
             self.flip = False
             self.direction = 1
-            dx = self._speed * self.direction
+            self.velocity.x = self._speed * self.direction
+        else:
+            self.velocity.x = 0
+
         if self.jump and not self.in_air:
             audio.jump()
-            self.y_vel = -20
+            self.velocity.y = -20
             self.jump = False
             self.in_air = True
         
         if self.in_air:
-            self.y_vel += Config.GRAVITY
-            if self.y_vel > 16: # terminal velocity
-                self.y_vel = 16
-        dy += self.y_vel
+            self.velocity.y += Config.GRAVITY
+            if self.velocity.y > 16: # terminal self.velocity
+                self.velocity.y = 16
 
-        # check collision with edges
-        if self.rect.bottom + dy >= Config.GROUND_HEIGHT:
+        self.rect.topleft += self.velocity
+
+        # edge collision
+        if self.rect.bottom >= Config.GROUND_HEIGHT:
+            self.rect.bottom = Config.GROUND_HEIGHT
             self.in_air = False
-            self.y_vel = 0
-            dy = Config.GROUND_HEIGHT - self.rect.bottom
-        if self.rect.left + dx <= 0:
-            dx = 0
-        elif self.rect.right + dx >= Config.S_WIDTH:
-            dx = 0
+            self.velocity.y = 0
 
-        self.rect.topleft += vec(dx, dy)
+        if self.rect.left < 0:
+            self.rect.left = 0
+        elif self.rect.right > Config.S_WIDTH:
+            self.rect.right = Config.S_WIDTH
 
-    def reset(self):
-        self.hp = 3
+        if self.action in ["idle", "walk", "run"]:
+            self.rect.y = Config.GROUND_HEIGHT - self.image.get_height()
+
+    def reset(self, health: int=5):
+        self.hp = health
         self.rect.topleft = self.start_pos
         self.in_air = False
         self.jump = False
+        self.move_left = False
+        self.move_right = False
+        self.immunity = 0
         self.update_action("idle")
 
     def draw(self, screen: pygame.Surface, box: bool=False):
         self.update_animation()
+        if self.immunity > 0:
+            self.immunity -= 1
+            if self.immunity % 10 < 5:
+                self.image.set_alpha(100)
+            else:
+                self.image.set_alpha(255)
+
+
         screen.blit(pygame.transform.flip(self.image, self.flip, False), self.rect)
         if box:
             pygame.draw.rect(screen, "red", self.rect, 1)

@@ -1,12 +1,18 @@
 import pygame
+import random
+
 from src.config import Config, Scoreboard, Stopwatch
 from src.player import Player, PlayerSprites, HealthBar
-from src.object import Obstacle
+from src.obstacle import Obstacle
 from src.audio import Audio
 from src.world import World
 
 def main():
     pygame.init()
+
+    pygame.event.set_blocked(None)
+    pygame.event.set_allowed([pygame.QUIT, pygame.KEYDOWN, pygame.KEYUP])
+    pygame.key.set_repeat()
 
     vec = pygame.math.Vector2
     screen = pygame.display.set_mode((Config.S_WIDTH, Config.S_HEIGHT))
@@ -23,8 +29,6 @@ def main():
     
     adventurer = PlayerSprites("./assets/adventurer/simple_adventurer.png")
     player = Player(adventurer)
-    move_left, move_right = False, False
-
     obstacles = pygame.sprite.Group()
 
     def die():
@@ -36,7 +40,7 @@ def main():
         screen.blit(screen_text, (Config.S_WIDTH/2-screen_text.get_width()/2, Config.S_HEIGHT/2-screen_text.get_height()))
         scoreboard.draw_highscore(screen, display_font)
 
-        pygame.display.update()
+        pygame.display.flip()
         pygame.time.delay(3000)
 
         # reset game
@@ -46,13 +50,13 @@ def main():
         timer.start()
         obstacles.empty()
 
-    run = True
+    running = True
     game_paused = False
 
     timer.start()
     audio.start_bgm()
 
-    while run:
+    while running:
         clock.tick(Config.FPS)
         world.draw(screen)
 
@@ -62,72 +66,66 @@ def main():
             pygame.display.update()
             pygame.time.delay(5000)
             game_paused = False
-        else:
-            pass
-
-        if player.hp > 0:
-            if player.jump or player.in_air:
-                player.update_action("jump")
-            elif move_left or move_right:
-                player.update_action("walk")
-            else:
-                player.update_action("idle")
-            player.move(move_left, move_right)
-        else:
+        elif player.hp <= 0:
             player.update_action("death")
             die()
 
         for event in pygame.event.get():
-            # quit game
-            if event.type == pygame.QUIT:
-                run = False
+            if event.type == pygame.QUIT: # exit
+                running = False
             # key presses
             if event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_q:
-                    run = False
-                if event.key == pygame.K_w:
+                if event.key == pygame.K_q: # exit
+                    running = False
+                if event.key == pygame.K_e: # pause
+                    game_paused = True
+                if event.key == pygame.K_w or event.key == pygame.K_UP:
                     player.jump = True
-                if event.key == pygame.K_a:
-                    move_left = True
-                if event.key == pygame.K_d:
-                    move_right = True
-                if event.key == pygame.K_e:
-                    game_paused = True
-                if event.key == pygame.K_SPACE:
-                    game_paused = True
+                if event.key == pygame.K_a or event.key == pygame.K_LEFT:
+                    player.move_left = True
+                if event.key == pygame.K_d or event.key == pygame.K_RIGHT:
+                    player.move_right = True
             # key release
             if event.type == pygame.KEYUP:
-                if event.key == pygame.K_a:
-                    move_left = False
-                if event.key == pygame.K_d:
-                    move_right = False
+                if event.key == pygame.K_a or event.key == pygame.K_LEFT:
+                    player.move_left = False
+                if event.key == pygame.K_d or event.key == pygame.K_RIGHT:
+                    player.move_right = False
+
+        if player.jump or player.in_air:
+            player.update_action("jump")
+        elif player.move_left or player.move_right:
+            player.update_action("walk")
+        else:
+            player.update_action("idle")
+        
+        player.move()
 
         #obstacle creation
-        if len(obstacles) < 3:
+        if len(obstacles) < random.randint(3,5):
             obstacle = Obstacle()
             obstacles.add(obstacle)
-        
-        # obstacle movement
+
+        if pygame.sprite.spritecollideany(player, obstacles, pygame.sprite.collide_mask):
+            if player.immunity == 0:
+                player.hp -= 1
+                player.immunity = 60
+                print("Hit")
+
+        obstacles.update()
         for obstacle in obstacles:
-            if player.mask.overlap(obstacle.mask, (vec(obstacle.rect[:2]) - vec(player.rect[:2]))):
-                # only hit once per object
-                if obstacle.hit:
-                    player.hp -= 1
-                    obstacle.hit = False
-            obstacle.move()
             if obstacle.rect.right <= 0:
                 scoreboard.add()
-                obstacles.remove(obstacle)
-                del obstacle
-                break
-            obstacle.draw(screen, box=True)
+                obstacle.reset()
+        obstacles.draw(screen)
 
         # draw and update display
         scoreboard.draw(screen, display_font)
         timer.draw(screen, display_font)
-        player.draw(screen, box=False)
-        health.draw(screen=screen, player_hp=player.hp)
-        pygame.display.update()
+        player.draw(screen)
+        
+        health.draw(screen, player.hp)
+        pygame.display.flip()
     
     # exit
     pygame.quit()
