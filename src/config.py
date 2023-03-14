@@ -3,13 +3,11 @@ import time
 
 class Config:
     FPS = 30
-
-    WIDTH = 960
-    HEIGHT = 540
-
+    S_WIDTH = 960
+    S_HEIGHT = 540
     GRAVITY = 1.5
-
     VOLUME = 0.1
+    GROUND_HEIGHT = S_HEIGHT - 20
 
 class Scoreboard:
     def __init__(self):
@@ -28,12 +26,20 @@ class Scoreboard:
         if n >= 0 and isinstance(n, int):
             self._score += n
 
-    def check(self):
+    def update(self):
         if self._score > self._high_score:
             self._high_score = self._score
 
     def reset(self):
         self._score = 0
+
+    def draw(self, screen, font):
+        text = font.render(f"Score: {self._score}", 1, "black")
+        screen.blit(text, (Config.S_WIDTH//2-text.get_width()//2, 10))
+
+    def draw_highscore(self, screen, font):
+        text = font.render(f"High Score: {self._high_score}", 1, "black")
+        screen.blit(text, (Config.S_WIDTH/2-text.get_width()/2, Config.S_HEIGHT/2+text.get_height()/2))
 
 class Stopwatch:
     def __init__(self):
@@ -70,3 +76,7 @@ class Stopwatch:
             self._running = 0
         else:
             print("Timer is in use.")
+
+    def draw(self, screen, font):
+        text = font.render(f"Time: {self.time_elapsed:.2f}s", 1, "black")
+        screen.blit(text, (Config.S_WIDTH-10-text.get_width(), 10))

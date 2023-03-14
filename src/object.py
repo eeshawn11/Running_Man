@@ -13,7 +13,7 @@ class Obstacle(pygame.sprite.Sprite):
         self.image.fill(random.choice(Obstacle.colors))
         self.rect = self.image.get_rect()
         self.mask = pygame.mask.from_surface(self.image)
-        self.start_pos = vec((Config.WIDTH+10, Config.HEIGHT-self.rect.height-5))
+        self.start_pos = vec((Config.S_WIDTH+self.rect.width, Config.GROUND_HEIGHT-self.rect.height))
         self.speed = -random.randint(5,10)
         self.rect.topleft = self.start_pos
         self.hit = True

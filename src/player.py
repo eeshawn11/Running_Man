@@ -43,8 +43,8 @@ class Player(pygame.sprite.Sprite):
         self.jump = False
         self.in_air = False
         self.start_pos = vec((75, 497))
-        self.action = "walk"
-        self.hp = 5
+        self.action = "idle"
+        self.hp = 3
 
         # not good, reevaluate
         self.sprites = spritesheet
@@ -92,7 +92,7 @@ class Player(pygame.sprite.Sprite):
             self.direction = 1
             dx = self._speed * self.direction
         if self.jump and not self.in_air:
-            audio.jump_fx.play()
+            audio.jump()
             self.y_vel = -20
             self.jump = False
             self.in_air = True
@@ -104,26 +104,40 @@ class Player(pygame.sprite.Sprite):
         dy += self.y_vel
 
         # check collision with edges
-        if self.rect.bottom + dy >= Config.HEIGHT-5:
+        if self.rect.bottom + dy >= Config.GROUND_HEIGHT:
             self.in_air = False
             self.y_vel = 0
-            dy = Config.HEIGHT-5 - self.rect.bottom
+            dy = Config.GROUND_HEIGHT - self.rect.bottom
         if self.rect.left + dx <= 0:
             dx = 0
-        elif self.rect.right + dx >= Config.WIDTH:
+        elif self.rect.right + dx >= Config.S_WIDTH:
             dx = 0
 
         self.rect.topleft += vec(dx, dy)
 
     def reset(self):
-        self.hp = 5
+        self.hp = 3
         self.rect.topleft = self.start_pos
         self.in_air = False
         self.jump = False
-        self.update_action("walk")
+        self.update_action("idle")
 
     def draw(self, screen: pygame.Surface, box: bool=False):
         self.update_animation()
         screen.blit(pygame.transform.flip(self.image, self.flip, False), self.rect)
         if box:
             pygame.draw.rect(screen, "red", self.rect, 1)
+
+class HealthBar():
+    def __init__(self, max_health: int=5):
+        self.__max_health = max_health
+        self.__heart = pygame.image.load("./assets/images/heart.png").convert_alpha()
+        self.__heart = pygame.transform.scale2x(self.__heart)
+        self.__damage = pygame.image.load("./assets/images/heart_damage.png").convert_alpha()
+        self.__damage = pygame.transform.scale2x(self.__damage)
+
+    def draw(self, screen, player_hp):
+        for point in range(player_hp):
+            screen.blit(self.__heart, (10 + point*25, 10))
+        for point in range(self.__max_health - player_hp):
+            screen.blit(self.__damage, (10 + player_hp*25 + point*25, 10))
