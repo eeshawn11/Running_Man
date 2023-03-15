@@ -10,7 +10,7 @@ from src.audio import Audio
 def main():
     pygame.init()
 
-    # event handling
+    # pygame event handling
     pygame.event.set_blocked(None)
     pygame.event.set_allowed([pygame.QUIT, pygame.KEYDOWN, pygame.KEYUP])
     pygame.key.set_repeat()
@@ -37,10 +37,11 @@ def main():
         # include death animation
         timer.stop()
         scoreboard.update()
+        audio.fade_bgm()
 
         screen_text = display_font.render(f"You played for {timer.run_time:.2f}s and scored {scoreboard.score} points!", 1, "black")
         screen.blit(screen_text, (Config.S_WIDTH/2-screen_text.get_width()/2, Config.S_HEIGHT/2-screen_text.get_height()))
-        scoreboard.draw_highscore(screen, display_font)
+        scoreboard.draw(screen, display_font, "highscore")
 
         pygame.display.flip()
         pygame.time.delay(3000)
@@ -51,6 +52,7 @@ def main():
         timer.reset()
         obstacles.empty()
         timer.start()
+        audio.start_bgm()
 
     running = True
     game_paused = False
@@ -63,10 +65,12 @@ def main():
         world.draw(screen)
 
         if game_paused:
+            timer.pause()
             paused = display_font.render("GAME PAUSED", 1, "black")
             screen.blit(paused, (Config.S_WIDTH/2-paused.get_width()/2, Config.S_HEIGHT/2-paused.get_height()/2))
             pygame.display.update()
             pygame.time.delay(5000)
+            timer.resume()
             game_paused = False
         elif player.hp <= 0:
             player.update_action("death")
@@ -102,9 +106,8 @@ def main():
             player.update_action("idle")
 
         #obstacle creation
-        # if len(obstacles) < random.randint(3,5):
-        if len(obstacles) < 1:
-            obstacle = Obstacle(200, 200)
+        if len(obstacles) < random.randint(1,4):
+            obstacle = Obstacle()
             obstacles.add(obstacle)
 
         if pygame.sprite.spritecollideany(player, obstacles, pygame.sprite.collide_mask):
@@ -116,6 +119,7 @@ def main():
         for obstacle in obstacles:
             if obstacle.rect.right <= 0:
                 scoreboard.add()
+                audio.point()
                 obstacle.reset()
         obstacles.draw(screen)
 

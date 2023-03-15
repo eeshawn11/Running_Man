@@ -35,7 +35,7 @@ python main.py
 ## To-Do List
 
 1. Include image sprites for objects
-1. ~~Include knockback~~ and sound effect when hitting objects
+1. ~~Include knockback and sound effect when hitting objects~~
 1. Include more background decoration, e.g. lamp posts or trees
 1. Add death animation
 1. Add start screen and pause screen
