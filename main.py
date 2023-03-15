@@ -2,31 +2,33 @@ import pygame
 import random
 
 from src.config import Config, Scoreboard, Stopwatch
+from src.world import World
 from src.player import Player, PlayerSprites, HealthBar
 from src.obstacle import Obstacle
 from src.audio import Audio
-from src.world import World
 
 def main():
     pygame.init()
 
+    # event handling
     pygame.event.set_blocked(None)
     pygame.event.set_allowed([pygame.QUIT, pygame.KEYDOWN, pygame.KEYUP])
     pygame.key.set_repeat()
+    pygame.mouse.set_visible(False)
 
     vec = pygame.math.Vector2
+    # set up display
     screen = pygame.display.set_mode((Config.S_WIDTH, Config.S_HEIGHT))
     pygame.display.set_caption("Running Man")
-    pygame.mouse.set_visible(False)
     display_font = pygame.font.Font("./assets/font/monogram.ttf", 25)
 
+    # initialise objects
     world = World()
     scoreboard = Scoreboard()
     timer = Stopwatch()
     audio = Audio()
     health = HealthBar()
     clock = pygame.time.Clock()
-    
     adventurer = PlayerSprites("./assets/adventurer/simple_adventurer.png")
     player = Player(adventurer)
     obstacles = pygame.sprite.Group()
@@ -53,8 +55,8 @@ def main():
     running = True
     game_paused = False
 
-    timer.start()
     audio.start_bgm()
+    timer.start()
 
     while running:
         clock.tick(Config.FPS)
