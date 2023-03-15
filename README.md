@@ -10,7 +10,7 @@ Move and jump to dodge cars as you run along this idyllic lake.
 
 - W or Up to jump
 - A, D, Left, Right to move
-- - E to pause the game
+- E to pause the game
 - Q to exit the game (in case a co-worker walks past)
 
 ## Installation
