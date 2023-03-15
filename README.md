@@ -37,6 +37,8 @@ python main.py
 1. Include image sprites for objects
 1. Include knockback and sound effect when hitting objects
 1. Include more background decoration, e.g. lamp posts or trees
+1. Add death animation
+1. Add start screen and pause screen
 1. Code refactoring
 1. Include list of resources in README for attribution
 1. Include GIF in README
