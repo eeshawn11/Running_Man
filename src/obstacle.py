@@ -7,9 +7,9 @@ vec = pygame.math.Vector2
 class Obstacle(pygame.sprite.Sprite):
     colors = ["black", "gray", "dark gray"]
 
-    def __init__(self):
+    def __init__(self, width=random.randint(30,70), height=random.randint(30,70)):
         super().__init__()
-        self.image = pygame.Surface([random.randint(30,70), random.randint(30,70)])
+        self.image = pygame.Surface([width, height])
         self.image.fill(random.choice(Obstacle.colors))
         self.rect = self.image.get_rect()
         self.mask = pygame.mask.from_surface(self.image)
@@ -26,3 +26,4 @@ class Obstacle(pygame.sprite.Sprite):
     def reset(self):
         self.rect.topleft = self.start_pos
         self.hit = True
+        self.speed = -random.randint(5,10)

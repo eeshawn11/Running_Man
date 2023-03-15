@@ -1,4 +1,3 @@
-import pygame
 import time
 
 class Config:
@@ -6,6 +5,7 @@ class Config:
     S_WIDTH = 960
     S_HEIGHT = 540
     GRAVITY = 1.5
+    FRICTION = 1
     VOLUME = 0.1
     GROUND_HEIGHT = S_HEIGHT - 20
 
@@ -39,7 +39,7 @@ class Scoreboard:
 
     def draw_highscore(self, screen, font):
         text = font.render(f"High Score: {self._high_score}", 1, "black")
-        screen.blit(text, (Config.S_WIDTH/2-text.get_width()/2, Config.S_HEIGHT/2+text.get_height()/2))
+        screen.blit(text, (Config.S_WIDTH//2-text.get_width()//2, Config.S_HEIGHT//2+text.get_height()//2))
 
 class Stopwatch:
     def __init__(self):
@@ -73,7 +73,6 @@ class Stopwatch:
         if not self._running:
             self._start_time = None
             self._run_time = None
-            self._running = 0
         else:
             print("Timer is in use.")
 

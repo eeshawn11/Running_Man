@@ -47,8 +47,8 @@ def main():
         player.reset()
         scoreboard.reset()
         timer.reset()
-        timer.start()
         obstacles.empty()
+        timer.start()
 
     running = True
     game_paused = False
@@ -98,19 +98,17 @@ def main():
             player.update_action("walk")
         else:
             player.update_action("idle")
-        
-        player.move()
 
         #obstacle creation
-        if len(obstacles) < random.randint(3,5):
-            obstacle = Obstacle()
+        # if len(obstacles) < random.randint(3,5):
+        if len(obstacles) < 1:
+            obstacle = Obstacle(200, 200)
             obstacles.add(obstacle)
 
         if pygame.sprite.spritecollideany(player, obstacles, pygame.sprite.collide_mask):
-            if player.immunity == 0:
-                player.hp -= 1
-                player.immunity = 60
-                print("Hit")
+            player.hit()
+
+        player.move()
 
         obstacles.update()
         for obstacle in obstacles:
@@ -123,7 +121,6 @@ def main():
         scoreboard.draw(screen, display_font)
         timer.draw(screen, display_font)
         player.draw(screen)
-        
         health.draw(screen, player.hp)
         pygame.display.flip()
     

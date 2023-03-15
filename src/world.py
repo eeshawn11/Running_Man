@@ -23,6 +23,6 @@ class World:
                 self.decor.append((self.objects[choice], (i*self.tile.get_width(), Config.GROUND_HEIGHT-self.objects[choice].get_height())))
 
     def draw(self, screen):
-        screen.blit(self.background, (0,0))
+        screen.blit(self.background, (0, 0))
         screen.blits(self.ground)
         screen.blits(self.decor)
