@@ -1,7 +1,8 @@
 import pygame
 from .config import Config
 
-def load_image(filename: str, alpha: bool=False):
+def load_and_scale_image(filename: str, alpha: bool=False) -> pygame.Surface:
+    """Load and convert pygame image."""
     if alpha:
         image = pygame.image.load(filename).convert_alpha()
     elif not alpha:
@@ -9,7 +10,8 @@ def load_image(filename: str, alpha: bool=False):
     image = pygame.transform.scale2x(image)
     return image
 
-def apply_friction(velocity):
+def apply_friction(velocity: float) -> float:
+    """Calculate and return velocity after applying friction."""
     if velocity > 0:
         velocity -= Config.FRICTION
         if velocity - Config.FRICTION < 0:
