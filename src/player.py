@@ -75,6 +75,7 @@ class Player(pygame.sprite.Sprite):
     
     def hit(self):
         if self.immunity == 0:
+            audio.hit()
             self.hp -= 1
             self.immunity = 60
             self.velocity = vec(-5, -10)
@@ -152,8 +153,8 @@ class Player(pygame.sprite.Sprite):
 class HealthBar():
     def __init__(self, max_health: int=5):
         self.__max_health = max_health
-        self.__heart = utils.load_image("./assets/images/heart.png", True)
-        self.__damage = utils.load_image("./assets/images/heart_damage.png", True)
+        self.__heart = utils.load_and_scale_image("./assets/images/heart.png", True)
+        self.__damage = utils.load_and_scale_image("./assets/images/heart_damage.png", True)
 
     def draw(self, screen: pygame.Surface, player_hp: int):
         if player_hp > self.__max_health:
