@@ -36,12 +36,19 @@ python main.py
 
 1. Include image sprites for objects
 1. ~~Include knockback and sound effect when hitting objects~~
-1. Include more background decoration, e.g. lamp posts or trees
+1. ~~Include more background decoration, e.g. lamp posts or trees~~
 1. Add death animation
 1. Add start screen and pause screen
 1. Code refactoring
-1. Include list of resources in README for attribution
+1. ~~Include list of resources in README for attribution~~
 1. Include GIF in README
+
+## Resources
+
+- Adventurer Sprite from [bdragon1727](https://bdragon1727.itch.io/)
+- Background Music from [FesliyanStudios](https://www.fesliyanstudios.com/royalty-free-music/downloads-c/8-bit-music/6)
+- monogram Font from [datagoblin](https://datagoblin.itch.io/)
+- Background decoration from [Blue Crystal Studio](https://bluecrystalstudio.itch.io/), [pngtree.com](https://pngtree.com/so/pixel)
 
 <!---
 adventurer sprite - https://bdragon1727.itch.io/16x16-pixel-adventures-character
@@ -51,4 +58,5 @@ https://www.youtube.com/watch?v=ePiMYe7JpJo
 font - https://datagoblin.itch.io/monogram
 bgm - https://www.fesliyanstudios.com/royalty-free-music/downloads-c/8-bit-music/6
 ground and grass - https://bluecrystalstudio.itch.io/pixel-tiles-pack
+tree - <a href='https://pngtree.com/so/pixel'>pixel png from pngtree.com/</a>
 --->
