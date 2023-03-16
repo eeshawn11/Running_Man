@@ -32,7 +32,7 @@ class PlayerSprites:
 
 
 class Player(pygame.sprite.Sprite):
-    def __init__(self, spritesheet: PlayerSprites, health: int=5):
+    def __init__(self, health: int=5):
         super().__init__()
         self._speed = 6
         self.velocity = vec(0, 0)
@@ -40,14 +40,14 @@ class Player(pygame.sprite.Sprite):
         self.in_air = False
         self.move_left = False
         self.move_right = False
-        self._action = "idle"
+        self._action = "walk"
         self.hp = health
         self.immunity = 0
         self._direction = 1
         self._flip = False
 
         # not good, reevaluate
-        self.sprites = spritesheet
+        self.sprites = PlayerSprites("./assets/adventurer/simple_adventurer.png")
         self.animation_index = 0
         self.update_time = pygame.time.get_ticks()
         self.image, self.mask = self.update_animation()
@@ -132,7 +132,7 @@ class Player(pygame.sprite.Sprite):
         self.move_right = False
         self.immunity = 0
         self.velocity = vec(0, 0)
-        self.update_action("idle")
+        self.update_action("walk")
 
     def draw(self, screen: pygame.Surface, box: bool=False):
         self.update_animation()

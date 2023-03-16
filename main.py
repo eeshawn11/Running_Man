@@ -3,7 +3,7 @@ import random
 
 from src.config import Config, Scoreboard, Stopwatch
 from src.world import World
-from src.player import Player, PlayerSprites, HealthBar
+from src.player import Player, HealthBar
 from src.obstacle import Obstacle
 from src.audio import Audio
 
@@ -29,8 +29,7 @@ def main():
     audio = Audio()
     health = HealthBar()
     clock = pygame.time.Clock()
-    adventurer = PlayerSprites("./assets/adventurer/simple_adventurer.png")
-    player = Player(adventurer)
+    player = Player()
     obstacles = pygame.sprite.Group()
 
     def die():
@@ -95,23 +94,27 @@ def main():
             if event.type == pygame.KEYUP:
                 if event.key == pygame.K_a or event.key == pygame.K_LEFT:
                     player.move_left = False
+                    player._flip = False
+                    player._direction = 1
                 if event.key == pygame.K_d or event.key == pygame.K_RIGHT:
                     player.move_right = False
 
         if player.jump or player.in_air:
             player.update_action("jump")
         elif player.move_left or player.move_right:
-            player.update_action("walk")
+            player.update_action("run")
         else:
-            player.update_action("idle")
+            player.update_action("walk")
 
         #obstacle creation
-        if len(obstacles) < random.randint(1,4):
-            obstacle = Obstacle()
-            obstacles.add(obstacle)
+        # if len(obstacles) < random.randint(0,3):
+        #     obstacle = Obstacle()
+        #     obstacles.add(obstacle)
 
         if pygame.sprite.spritecollideany(player, obstacles, pygame.sprite.collide_mask):
-            player.hit()
+            for obstacle in pygame.sprite.spritecollide(player, obstacles, False, pygame.sprite.collide_mask):
+                if player.rect.bottom >= obstacle.rect.top and player.rect.right < obstacle.rect.centerx - 30:
+                    player.hit()
 
         player.move()
 

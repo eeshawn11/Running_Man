@@ -10,7 +10,7 @@ class Config:
     FRICTION = 1
     VOLUME = 0.1
     GROUND_HEIGHT = S_HEIGHT - 16
-    SCROLL = -3
+    SCROLL = -1
 
 class Scoreboard:
     """
