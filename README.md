@@ -8,10 +8,10 @@ Remember those long car rides where you imagined a character running alongside t
 
 Move and jump to dodge cars as you run along this idyllic lake.
 
-- W or Up to jump
-- A, D, Left, Right to move
-- E to pause the game
-- Q to exit the game (in case a co-worker walks past)
+- ![W](./assets/readme/computer_key_W_T.png) to jump
+- ![A](./assets/readme/computer_key_A_T.png), ![D](./assets/readme/computer_key_D_T.png) to move
+- ![E](./assets/readme/computer_key_E_T.png) to pause the game
+- ![Q](./assets/readme/computer_key_Q_T.png) to quickly exit the game (in case a co-worker walks past)
 
 ## Installation
 
