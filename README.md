@@ -1,4 +1,4 @@
-# Running Man (v0.3.0)
+# Running Man (v0.4.1)
 
 Remember those long car rides where you imagined a character running alongside the vehicle? I've recreated that experience in `PyGame`! Dodge cars and jump over obstacles as you run along a picturesque lake. See how far you can go and try to beat your high score.
 
@@ -35,8 +35,8 @@ python main.py
 ## To-Do List
 
 1. Include image sprites for objects
-1. Add death animation
-1. Add start screen and pause screen
+1. ~~Add death animation~~
+1. Add start screen and ~~pause screen~~
 1. Code refactoring
 1. Include GIF in README
 

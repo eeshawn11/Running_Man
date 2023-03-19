@@ -38,12 +38,13 @@ def main():
 
 if __name__ == "__main__":
     # setup logger
-    log_format = "%(asctime)s - %(levelname)s - %(name)s - %(filename)s - %(lineno)d - %(message)s"
-    log = logging.getLogger("runningman")
-    log.setLevel("INFO")
-    file_handler = logging.FileHandler("logs/app.log")
-    formatter = logging.Formatter(log_format)
-    file_handler.setFormatter(formatter)
-    log.addHandler(file_handler)
+    if Config.log:
+        log_format = "%(asctime)s - %(levelname)s - %(name)s - %(filename)s - %(lineno)d - %(message)s"
+        log = logging.getLogger("runningman")
+        log.setLevel("INFO")
+        file_handler = logging.FileHandler("logs/app.log")
+        formatter = logging.Formatter(log_format)
+        file_handler.setFormatter(formatter)
+        log.addHandler(file_handler)
 
     main()

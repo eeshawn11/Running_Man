@@ -24,6 +24,8 @@ class Config:
     scroll = -2
     # game status
     status = GameState.GAME_PLAY
+    # logging
+    log = False
 
     # key bindings
     left_keybind = [K_a]
