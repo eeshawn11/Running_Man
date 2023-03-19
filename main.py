@@ -1,5 +1,6 @@
 import pygame
 import logging
+import os
 
 from src.config import Config, GameState
 from src.game_service import Game
@@ -38,13 +39,19 @@ def main():
 
 if __name__ == "__main__":
     # setup logger
+    log_format = "%(asctime)s - %(levelname)s - %(name)s - %(filename)s - %(lineno)d - %(message)s"
+    log = logging.getLogger("runningman")
+    log.setLevel("INFO")
+    if not os.path.isdir("logs"):
+        os.mkdir("logs")
+    file_handler = logging.FileHandler("logs/app.log")
+    formatter = logging.Formatter(log_format)
+    file_handler.setFormatter(formatter)
+    log.addHandler(file_handler)
+
     if Config.log:
-        log_format = "%(asctime)s - %(levelname)s - %(name)s - %(filename)s - %(lineno)d - %(message)s"
-        log = logging.getLogger("runningman")
-        log.setLevel("INFO")
-        file_handler = logging.FileHandler("logs/app.log")
-        formatter = logging.Formatter(log_format)
-        file_handler.setFormatter(formatter)
-        log.addHandler(file_handler)
+        logging.disable(logging.NOTSET)
+    elif Config.log is False:
+        logging.disable(logging.CRITICAL)
 
     main()

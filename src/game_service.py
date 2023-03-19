@@ -192,10 +192,6 @@ class Game:
     
     def pause(self):
         self.check_input()
-
-        # overlay = pygame.Surface((Config.S_WIDTH, Config.S_HEIGHT), pygame.SRCALPHA)
-        # overlay.fill((211,211,211, 5))
-        # self.screen.blit(overlay, (0, 0))
         paused = self.display_font.render("GAME PAUSED", 1, "black")
         self.screen.blit(paused, (Config.S_WIDTH/2-paused.get_width()/2, Config.S_HEIGHT/2-paused.get_height()/2))
 

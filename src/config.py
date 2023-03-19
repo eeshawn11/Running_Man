@@ -24,7 +24,7 @@ class Config:
     scroll = -2
     # game status
     status = GameState.GAME_PLAY
-    # logging
+    # toggle logging
     log = False
 
     # key bindings

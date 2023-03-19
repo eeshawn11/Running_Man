@@ -1,8 +1,8 @@
-# Running Man (v0.4.1)
+# Running Man (v0.4.2)
 
-Remember those long car rides where you imagined a character running alongside the vehicle? I've recreated that experience in `PyGame`! Dodge cars and jump over obstacles as you run along a picturesque lake. See how far you can go and try to beat your high score.
+Remember those long car rides where you imagined a character running alongside the vehicle? I've recreated that experience in `PyGame`! Dodge obstacles as you run along a picturesque lake. See how far you can go and try to beat your high score.
 
-> Still a work in progress. Happy to receive any feedback via [Issues](https://github.com/eeshawn11/Running_Man/issues).
+> Still a work in progress. Happy to receive any feedback via [Issues](https://github.com/eeshawn11/Running_Man/issues)!
 
 ## How to Play
 
