@@ -1,65 +1,67 @@
 import pygame
-import json
+import logging
+
+log = logging.getLogger("runningman.player")
+
 from .config import Config
-from .audio import Audio
-from . import utils
+from .audio_service import AudioService
+from .visuals import PlayerSprites
 
 vec = pygame.math.Vector2
-audio = Audio()
 
-class PlayerSprites:
-    def __init__(self, filename: str):
-        self.sprite_sheet = pygame.image.load(filename).convert()
-        with open(filename.replace("png", "json")) as f:
-            self.metadata = json.load(f)
-        self.actions = self.metadata.keys()
-
-    def num_frames(self, action: str):
-        return self.metadata[action]["frames"]
-
-    def get_sprite(self, x: int, y: int, w: int, h: int):
-        sprite = pygame.Surface((w, h))
-        sprite.set_colorkey((0,0,0))
-        sprite.blit(self.sprite_sheet, (0, 0), (x, y, w, h))
-        sprite = pygame.transform.scale2x(sprite)
-        return sprite
-
-    def parse_sprite(self, action: str, frame: int):
-        sprites = self.metadata[action]["sprites"]
-        x, y, w, h = sprites[frame].values()
-        image = self.get_sprite(x, y, w, h)
-        return image
-
+def apply_friction(velocity: float) -> float:
+    """Calculate and return velocity after applying friction."""
+    if velocity > 0:
+        velocity -= Config.FRICTION
+        if velocity - Config.FRICTION < 0:
+            velocity = 0
+    elif velocity < 0:
+        velocity += Config.FRICTION
+        if velocity + Config.FRICTION > 0:
+            velocity = 0
+    return velocity
 
 class Player(pygame.sprite.Sprite):
     def __init__(self, health: int=5):
         super().__init__()
+        self.logger = logging.getLogger("runningman.player.Player")
         self._speed = 6
+        self.hp = health
+        self.start_pos = (75, Config.GROUND_HEIGHT)
+
+        # player status
+        self.immunity = 0
+        self._action = "walk"
         self.velocity = vec(0, 0)
-        self.jump = False
-        self.in_air = False
         self.move_left = False
         self.move_right = False
-        self._action = "walk"
-        self.hp = health
-        self.immunity = 0
-        self._direction = 1
-        self._flip = False
+        self.jump = False
+        self.in_air = False
 
-        # not good, reevaluate
-        self.sprites = PlayerSprites("./assets/adventurer/simple_adventurer.png")
+        # player sprite
+        self.sprites = PlayerSprites()
         self.animation_index = 0
         self.update_time = pygame.time.get_ticks()
-        self.image, self.mask = self.update_animation()
-        self.rect = self.image.get_rect()
-        self.start_pos = vec((75, Config.GROUND_HEIGHT-self.rect.height))
-        self.rect.topleft = self.start_pos
+        self.update_animation()
+        self.rect = self.image.get_rect(bottomleft=self.start_pos)
+        self.logger.info("Player object initialised")
+
+    def get_status(self):
+        if self.hp > 0:
+            if self.jump or self.in_air:
+                self.update_action("jump")
+            elif self.move_left or self.move_right:
+                self.update_action("run")
+            else:
+                self.update_action("walk")
 
     def update_action(self, new_action: str):
+        if new_action not in self.sprites.actions:
+            raise ValueError(f"action must be one of {self.sprites.actions}")
         if new_action != self._action:
             self._action = new_action
             self.animation_index = 0
-            self.update = pygame.time.get_ticks()
+            self.update_time = pygame.time.get_ticks()
 
     def update_animation(self):
         ANIMATION_COOLDOWN = 100
@@ -67,38 +69,25 @@ class Player(pygame.sprite.Sprite):
         if pygame.time.get_ticks() - self.update_time > ANIMATION_COOLDOWN:
             self.update_time = pygame.time.get_ticks()
             self.animation_index += 1
-        if self.animation_index >= self.sprites.num_frames(self._action):
+        if self._action != "death" and self.animation_index >= self.sprites.num_frames(self._action):
             self.animation_index = 0
         self.image = self.sprites.parse_sprite(self._action, self.animation_index)
         self.mask = pygame.mask.from_surface(self.image)
-        return self.image, self.mask
-    
-    def hit(self):
-        if self.immunity == 0:
-            audio.hit()
-            self.hp -= 1
-            self.immunity = 60
-            self.velocity = vec(-5, -10)
-            self.jump = False
-            self.in_air = True
-            self.move_left = False
-            self.move_right = False
-            self.move()
 
     def move(self):
+        self.get_status()
         if self.move_left:
-            self._flip = True
-            self._direction = -1
-            self.velocity.x = self._speed * self._direction
+            self.velocity.x = -self._speed
+            Config.scroll = -1
         elif self.move_right:
-            self._flip = False
-            self._direction = 1
-            self.velocity.x = self._speed * self._direction
+            self.velocity.x = self._speed
+            Config.scroll = -3
         elif not self.move_left and not self.move_right and not self.in_air:
-            self.velocity.x = utils.apply_friction(self.velocity.x)
+            self.velocity.x = apply_friction(self.velocity.x)
+            Config.scroll = -2
 
         if self.jump and not self.in_air:
-            audio.jump()
+            AudioService.jump()
             self.velocity.y = -20
             self.jump = False
             self.in_air = True
@@ -123,6 +112,20 @@ class Player(pygame.sprite.Sprite):
         elif self.rect.right > Config.S_WIDTH:
             self.rect.right = Config.S_WIDTH
 
+        if self._action in ["idle", "walk", "run", "death"]:
+            self.rect.bottom = Config.GROUND_HEIGHT
+
+    def hit(self):
+        if self.immunity == 0:
+            AudioService.hit()
+            self.hp -= 1
+            self.immunity = 60
+            self.velocity = vec(-5, -10)
+            self.jump = False
+            self.in_air = True
+            self.move_left = False
+            self.move_right = False
+
     def reset(self, health: int=5):
         self.hp = health
         self.rect.topleft = self.start_pos
@@ -134,10 +137,7 @@ class Player(pygame.sprite.Sprite):
         self.velocity = vec(0, 0)
         self.update_action("walk")
 
-    def draw(self, screen: pygame.Surface, box: bool=False):
-        self.update_animation()
-        if self._action in ["idle", "walk", "run"]:
-            self.rect.y = Config.GROUND_HEIGHT - self.image.get_height()
+    def immunity_animation(self):
         if self.immunity > 0:
             self.immunity -= 1
             if self.immunity % 10 < 5:
@@ -145,21 +145,19 @@ class Player(pygame.sprite.Sprite):
             else:
                 self.image.set_alpha(255)
 
+    def update(self):
+        self.update_animation()
+        self.move()
 
-        screen.blit(pygame.transform.flip(self.image, self._flip, False), self.rect)
+    def draw(self, screen: pygame.Surface, box: bool=False):
+        self.immunity_animation()
+        screen.blit(pygame.transform.flip(self.image, self.move_left, False), self.rect)
         if box:
             pygame.draw.rect(screen, "red", self.rect, 1)
 
-class HealthBar():
-    def __init__(self, max_health: int=5):
-        self.__max_health = max_health
-        self.__heart = utils.load_and_scale_image("./assets/images/heart.png", True)
-        self.__damage = utils.load_and_scale_image("./assets/images/heart_damage.png", True)
-
-    def draw(self, screen: pygame.Surface, player_hp: int):
-        if player_hp > self.__max_health:
-            player_hp = self.__max_health
-        for point in range(player_hp):
-            screen.blit(self.__heart, (10 + point*25, 10))
-        for point in range(self.__max_health - player_hp):
-            screen.blit(self.__damage, (10 + player_hp*25 + point*25, 10))
+    def death_animation(self, screen):
+        self.update_action("death")
+        
+        self.update()
+        self.rect = self.image.get_rect(bottomleft=self.rect.bottomleft)
+        self.draw(screen)
