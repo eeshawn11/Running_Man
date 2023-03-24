@@ -161,7 +161,6 @@ class Game:
 
     def run(self):
         self.check_input()
-        print(Config.scroll)
 
         #obstacle creation
         if len(self.obstacles.sprites()) < 3 and self.last_obstacle.rect.x < Config.S_WIDTH * random.uniform(0.5, 0.8):

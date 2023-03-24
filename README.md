@@ -1,4 +1,4 @@
-# Running Man (v0.5.0)
+# Running Man (v0.5.1)
 
 As someone who's grown up playing games, I decided to challenge myself by creating a simple game in `PyGame`. During car rides while I was younger, I've often imagined a character running alongside our car and dodging obstacles. Although I'm not a graphics designer or game developer, I drew upon my knowledge of Python to bring my vision to life.
 
@@ -14,6 +14,8 @@ Dodge obstacles as you run along a path. See how far you can go and try to beat 
 - ![A](./assets/readme/computer_key_A_T.png) and ![D](./assets/readme/computer_key_D_T.png) to move
 - ![E](./assets/readme/computer_key_E_T.png) to pause the game or reset after you die
 - ![Q](./assets/readme/computer_key_Q_T.png) to quickly exit the game (in case a co-worker walks past!)
+
+<img src="./assets/readme/gameplay.gif" width="500">
 
 ## Installation
 
@@ -39,7 +41,7 @@ python main.py
 1. Add start screen
 1. Work on parallax background effect
 1. Code refactoring
-1. Include GIF in README
+1. ~~Include GIF in README~~
 
 ## Resources
 
