@@ -3,59 +3,104 @@ import random
 import json
 import logging
 
-log = logging.getLogger("runningman.visuals")
-
 from .config import Config
 
-def load_background() -> pygame.Surface:
-    return pygame.image.load("./assets/images/background.jpg").convert()
+class Background():
+    def __init__(self, x, y):
+        self.images = []
+        self.rects = []
 
-def flip_x(image: pygame.Surface) -> pygame.Surface:
-    """Randomly flips and returns a PyGame Surface"""
-    flip_x = random.randint(0, 1)
-    image = pygame.transform.flip(image, flip_x, False)
-    return image
+        for img in range(5):
+            bg_image = pygame.image.load(f"./assets/images/background_layer_{img}.png").convert_alpha()
+            bg_image = pygame.transform.scale_by(bg_image, 2.5)
+            bg_rect = bg_image.get_rect()
+            bg_rect.topleft = (x, y)
+
+            self.images.append(bg_image)
+            self.rects.append(bg_rect)
+
+    def update(self):
+        for rect in self.rects:
+            rect.x += Config.BG_SCROLL
+            if rect.right <= 0:
+                rect.x = Config.S_WIDTH
+
+    def draw(self, screen):
+        screen.blits(blit_sequence=zip(self.images, self.rects))
+
 
 class SpriteObject(pygame.sprite.Sprite):
-    def __init__(self, image_path: str, alpha: bool=False, flip: bool=False):
+    def __init__(self, image_path: str, alpha: bool=False, flip: bool=False, scale : float=1.0):
         super().__init__()
+        self.logger = logging.getLogger("runningman.visuals.SpriteObject")
         self.image = pygame.image.load(image_path)
         if alpha:
             self.image = self.image.convert_alpha()
         else:
             self.image = self.image.convert()
         if flip:
-            self.image = flip_x(self.image)
+            self.image = self.flip_x(self.image)
+        if scale:
+            self.image = pygame.transform.scale_by(self.image, scale)
         self.width = self.image.get_width()
         self.rect = self.image.get_rect()
 
     def update(self):
         self.rect.x += Config.scroll
-        if self.rect.right < 0:
+        if self.rect.right <= 0:
             self.rect.x = Config.S_WIDTH
+
+    @staticmethod
+    def flip_x(image: pygame.Surface) -> pygame.Surface:
+        """Randomly flips and returns a PyGame Surface"""
+        flip_x = random.randint(0, 1)
+        image = pygame.transform.flip(image, flip_x, False)
+        return image
 
 class Tile(SpriteObject):
     def __init__(self):
         super().__init__("./assets/images/tile_ground.png")
+        self.prev = None
+
+    def get_right(self):
+        return self.rect.right
+
+    def update(self):
+        """Using a linked list, reassign tile to the end of the list."""
+        self.rect.x += Config.scroll
+        if self.rect.right <= 0:
+            if self.prev is None:
+                self.rect.x = Config.S_WIDTH
+            else:
+                self.rect.x = self.prev.get_right()
 
 class Grass(SpriteObject):
-    def __init__(self):
-        super().__init__("./assets/images/decor_grass.png", alpha=True, flip=True)
+    count = 4
+    paths = [f"./assets/images/grass{i}.png" for i in range(count)]
 
-class Lamp(SpriteObject):
     def __init__(self):
-        super().__init__("./assets/images/lamp.png", alpha=True)
+        path = random.choice(Grass.paths)
+        super().__init__(path, alpha=True, flip=True)
+
+class Bush(SpriteObject):
+    count = 3
+    paths = [f"./assets/images/bush{i}.png" for i in range(count)]
+
+    def __init__(self):
+        path = random.choice(Bush.paths)
+        super().__init__(path, alpha=True, flip=True, scale=random.uniform(0.5, 1.0))
 
 class Tree(SpriteObject):
-    paths = [f"./assets/images/tree{i}.png" for i in range(2)]
+    count = 2
+    paths = [f"./assets/images/tree{i}.png" for i in range(count)]
 
     def __init__(self):
         path = random.choice(Tree.paths)
-        super().__init__(path, alpha=True, flip=True)
+        super().__init__(path, alpha=True, flip=True, scale=random.uniform(1.5, 2.5))
 
     def update(self):
         self.rect.x += Config.scroll
-        if self.rect.right < 0:
+        if self.rect.right <= 0:
             self.kill()
 
 class Heart(SpriteObject):

@@ -2,8 +2,6 @@ import pygame
 import time
 import logging
 
-log = logging.getLogger("runningman.utils")
-
 from .config import Config, GameState
 from .visuals import Heart
 
@@ -27,6 +25,7 @@ class Scoreboard:
         self._high_score = 0
         self._score = 0
         self.font_color = (0, 0, 0)
+        self.logger.debug("Scoreboard initialised.")
 
     @property
     def score(self) -> int:
@@ -48,10 +47,12 @@ class Scoreboard:
         """Updates the high score if the current score is higher."""
         if self._score > self._high_score:
             self._high_score = self._score
+            self.logger.info(f"New high score: {self._high_score}")
 
     def reset(self) -> None:
         """Resets the score to zero."""
         self._score = 0
+        self.logger.debug("Scoreboard.score reset.")
 
     def draw(self, screen: pygame.Surface, font: pygame.font.Font) -> None:
         """
@@ -106,6 +107,7 @@ class Stopwatch:
         self._pause_time = None
         self._paused_duration = 0
         self._running = False
+        self.logger.debug("Stopwatch initialised.")
 
     def start(self) -> None:
         """Starts the stopwatch if it is not running."""
@@ -170,7 +172,7 @@ class Stopwatch:
         screen.blit(text, (Config.S_WIDTH-10-text.get_width(), 10))
 
 class HealthBar():
-    def __init__(self, max_health: int=5):
+    def __init__(self, max_health: int=3):
         self.logger = logging.getLogger("runningman.utils.HealthBar")
         self.__max_health = max_health
         self.hearts = pygame.sprite.Group()
@@ -179,6 +181,8 @@ class HealthBar():
             heart = Heart()
             heart.rect.topleft = (10 + point*25, 10)
             self.hearts.add(heart)
+
+        self.logger.debug("HealthBar initialised.")
 
     def draw(self, screen: pygame.Surface, player_hp: int):
         if player_hp > self.__max_health:

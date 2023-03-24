@@ -30,7 +30,7 @@ def main():
         
         pygame.display.flip()
         clock.tick(Config.FPS)
-        log.debug(f"fps: {clock.get_fps()}")
+        log.debug(f"FPS: {clock.get_fps()}")
     
     # exit
     log.info("Game end.")
@@ -41,10 +41,10 @@ if __name__ == "__main__":
     # setup logger
     log_format = "%(asctime)s - %(levelname)s - %(name)s - %(filename)s - %(lineno)d - %(message)s"
     log = logging.getLogger("runningman")
-    log.setLevel("INFO")
+    log.setLevel(Config.log_level)
     if not os.path.isdir("logs"):
         os.mkdir("logs")
-    file_handler = logging.FileHandler("logs/app.log")
+    file_handler = logging.FileHandler("logs/app.log", mode='w')
     formatter = logging.Formatter(log_format)
     file_handler.setFormatter(formatter)
     log.addHandler(file_handler)
